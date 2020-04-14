@@ -1,0 +1,20 @@
+sudo: required
+servies:
+  - docker
+
+before_install:
+  - docker build -t craytee/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run -e CI=true craytee/react-test npm test
+
+after_success:
+  - docker build -t craytee/multi-client ./client
+  - docker build -t craytee/multi-nginx ./nginx
+  - docker build -t craytee/multi-server ./server
+  - docker build -t craytee/multi-worker ./worker
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  - docker push craytee/multi-client
+  - docker push craytee/multi-nginx
+  - docker push craytee/multi-server
+  - docker push craytee/multi-worker
