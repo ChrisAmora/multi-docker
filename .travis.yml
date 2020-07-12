@@ -12,21 +12,19 @@ after_success:
   - docker build -t craytee/multi-client ./client
   - docker build -t craytee/multi-nginx ./nginx
   - docker build -t craytee/multi-server ./server
-  - docker build -t craytee/multi-worker ./worker
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
   - docker push craytee/multi-client
   - docker push craytee/multi-nginx
   - docker push craytee/multi-server
-  - docker push craytee/multi-worker
 
 deploy:
   edge: true
   provider: elasticbeanstalk
   region: us-east-2
-  app: multi-docker
-  env: MultiDocker-env
+  app: mt-docker
+  env: MtDocker-env
   bucket_name: elasticbeanstalk-us-east-2-739683147855
-  bucket_path: docker-multi
+  bucket_path: docker-mult
   on:
     branch: master
   access_key_id: $AWS_ACCESS_KEY
