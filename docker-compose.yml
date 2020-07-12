@@ -1,30 +1,32 @@
 version: "3"
 services:
   postgres:
-    image: "postgres:9.5.18"
+    image: "postgres:latest"
+    environment:
+      - POSTGRES_PASSWORD=postgres_password
   redis:
     image: "redis:latest"
   nginx:
-    depends_on:
-      - api
-      - client
     restart: always
     build:
       dockerfile: Dockerfile.dev
       context: ./nginx
+    depends_on:
+      - client
     ports:
       - "3050:80"
   api:
-    depends_on:
-      - postgres
     build:
       dockerfile: Dockerfile.dev
-      context: "./server"
+      context: ./server
+    depends_on:
+      - postgres
+      - redis
     volumes:
       - /app/node_modules
-      - ./server:/app # every time we try to access /app inside the container expect for node modules, we are redirected to /server inside aur current project folder
+      - ./server:/app
     environment:
-      - REDIS_HOST=redis # service name = ip
+      - REDIS_HOST=redis
       - REDIS_PORT=6379
       - PGUSER=postgres
       - PGHOST=postgres
@@ -35,6 +37,9 @@ services:
     build:
       dockerfile: Dockerfile.dev
       context: ./client
+    depends_on:
+      - postgres
+      - redis
     volumes:
       - /app/node_modules
       - ./client:/app
@@ -45,6 +50,9 @@ services:
     build:
       dockerfile: Dockerfile.dev
       context: ./worker
+    depends_on:
+      - postgres
+      - redis
     volumes:
       - /app/node_modules
       - ./worker:/app
